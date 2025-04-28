@@ -10,7 +10,7 @@ from tabulate import tabulate
 
 load_dotenv()
 
-# ----- DATABASE SEt- Up ----
+# ----- Database Set- Up ----
 
 DATABASE_URL = "postgresql://cloudcomputing_ngy9_user:n64n2DQKL9UpSi2NohaQJNoCjwstZqur@dpg-d070d99r0fns7382jqsg-a.singapore-postgres.render.com/cloudcomputing_ngy9"
 print("Mugot, Chris Jallaine")
@@ -29,10 +29,12 @@ try:
                 password VARCHAR(255) NOT NULL
             );
 
+            -- Alter the table to change deadline type or create with VARCHAR
+            DROP TABLE IF EXISTS tasks;
             CREATE TABLE IF NOT EXISTS tasks (
                 id SERIAL PRIMARY KEY,
                 task VARCHAR(255) NOT NULL,
-                deadline DATE NOT NULL,
+                deadline VARCHAR(255) NOT NULL,
                 username VARCHAR(255) NOT NULL,
                 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
             );
@@ -86,7 +88,7 @@ class User(BaseModel):
 
 class Task(BaseModel):
     task: str
-    deadline: str  # format: YYYY-MM-DD
+    deadline: str  # can now be any string like "everyday"
     user: str
 
 @app.post("/login/")
@@ -170,7 +172,7 @@ async def create_task(task: Task):
     except Exception as e:
         print("Create task error:", traceback.format_exc())
         connection.rollback()
-        raise HTTPException(status_code=500, detail="Error creating task.")
+        raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
 
 @app.get("/get_tasks/")
 async def get_tasks(name: str):
